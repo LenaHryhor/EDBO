@@ -1,11 +1,13 @@
 const getOneDiploma = require('../services/diplomasService')
 
 const getDiploma = async(req, res) => {
-    const { series, number, name, surname, patronymic, type } = req.query;
+    const { series, number, name, surname, patronymic, type, global_type } = req.query;
     const diploma = await getOneDiploma(series, number, name, surname, patronymic);
     if (!diploma) {
         throw new InvalidRequestError('Немає записів з такими даними!')
     }
+
+    diploma.global_type = global_type;
     diploma.type = type;
     diploma.surname = surname;
     diploma.name = name;
