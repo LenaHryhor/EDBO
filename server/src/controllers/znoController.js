@@ -2,15 +2,18 @@ const getOneYearZno = require('../services/znoService')
 
 const getZno = async(req, res) => {
     const { year, number, name, surname, patronymic } = req.query;
-    const zno = await getOneYearZno(year, number, name, surname, patronymic);
-    if (!zno) {
-        throw new InvalidRequestError('Немає записів з такими даними!')
+    const result = await getOneYearZno(year, number, name, surname, patronymic);
+    if (result.length === 0) {
+        return res.status(400).json({ message: 'Немає записів з такими даними!' })
     }
-    zno.number = number;
-    zno.year = year;
-    zno.patronymic = patronymic;
-    zno.surname = surname;
-    zno.name = name;
+    const zno = {
+        result: result,
+        number: number,
+        year: year,
+        patronymic: patronymic,
+        surname: surname,
+        name: name
+    }
     res.status(200).json(zno);
 }
 

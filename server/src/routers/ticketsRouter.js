@@ -1,5 +1,5 @@
 const asyncWrapper = require('../utils/apiUtils');
-const { getTicket, createTicket, updateTicket, deleteTicket } = require('../controllers/ticketsController')
+const { getTicket, createTicket, updateTicket } = require('../controllers/ticketsController')
 const authMiddleware = require('../middlewares/authMiddleware')
 const router = require('express').Router();
 

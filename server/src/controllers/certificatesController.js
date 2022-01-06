@@ -1,15 +1,15 @@
-const getOneCertificate = require('../services/certificatesService')
+const { getOneCertificate, createOneCertificate, updateOneCertificate } = require('../services/certificatesService')
 
 const getCertificate = async(req, res) => {
     const { year, number, name, surname, patronymic } = req.query;
     const certificate = await getOneCertificate(year, number, name, surname, patronymic);
     if (!certificate) {
-        throw new InvalidRequestError('Немає записів з такими даними!')
+        return res.status(400).json({ message: 'Немає записів з такими даними!' })
     }
-    if (ticket.end_date > new Date().getHours()) {
-        ticket.status = "Активний"
+    if (certificate.end_date > Date.now()) {
+        certificate.status = "Активний"
     } else {
-        ticket.status = "Неактивний"
+        certificate.status = "Неактивний"
     }
     certificate.surname = surname;
     certificate.name = name;
@@ -18,12 +18,15 @@ const getCertificate = async(req, res) => {
 }
 
 const createCertificate = async(req, res) => {
-    res.json();
+    const { year_graduation, number, position, comission_number, name, surname, patronymic, start_date, end_date, p_series, p_number, authority_code, issue_date } = req.body;
+    await createOneCertificate({ year_graduation, number, position, comission_number, name, surname, patronymic, start_date, end_date, p_series, p_number, authority_code, issue_date })
+    res.status(200).json({ message: "Certificate created successfully" })
 }
 
 const updateCertificate = async(req, res) => {
-    res.json();
+    const { certificate_id, year_graduation, number, position, comission_number, start_date, end_date } = req.body;
+    await updateOneCertificate({ certificate_id, year_graduation, number, position, comission_number, start_date, end_date })
+    res.status(200).json({ message: "Certificate updated successfully" })
 }
-
 
 module.exports = { getCertificate, createCertificate, updateCertificate }
