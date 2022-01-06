@@ -63,6 +63,7 @@ const addRegistrator = async(email, name, surname, patronymic, identification_co
         await client3.query(`INSERT INTO registrars (identification_code, position, person_fk, email, organization_fk, login, password, status) VALUES ('${identification_code}', '${position}', ${person_id.person_id}, '${email}', ${organization.rows[0].organization_id},'${username}','${db_password}', 'true')`)
         client2.end();
     } catch (err) {
+        µ
         throw new SqlError(err.message)
     }
 }
