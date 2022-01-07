@@ -5,12 +5,14 @@ const certificatesRouter = require('./certificatesRouter');
 const institutionsRouter = require('./institutionsRouter');
 const znoRouter = require('./znoRouter');
 const authRouter = require('./authRouter');
+const personsRouter = require('./personsRouter');
 
 router.use('/tickets', ticketsRouter);
 router.use('/diplomas', dimlomasRouter);
 router.use('/certificates', certificatesRouter);
 router.use('/institutions', institutionsRouter);
 router.use('/zno', znoRouter);
+router.use('/persons', personsRouter);
 router.use('/auth', authRouter);
 
 module.exports = router;

@@ -22,7 +22,11 @@ const authMiddleware = (req, res, next) => {
             username: tokenPayload.username,
             role: tokenPayload.role
         };
+        console.log(token)
         console.log(req.user.role)
+        if (req.user.role != 'registrator') {
+            return res.status(403).json({ message: 'No rights' });
+        }
         next();
     } catch (err) {
         res.status(401).json({ message: err.message });
