@@ -15,6 +15,7 @@ const createPerson = async(req, res) => {
     res.status(200).json({ message: "Person created successfully" })
 }
 
+
 const updatePerson = async(req, res) => {
     const { person_id, name, surname, patronymic, p_series, p_number, birthday_date, issue_date, authority_code } = req.body;
     await updateOnePerson({ person_id, name, surname, patronymic, p_series, p_number, birthday_date, issue_date, authority_code })

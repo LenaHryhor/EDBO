@@ -1,10 +1,14 @@
 const createConnection = require('../db');
 const { SqlError, InvalidRequestError } = require('../utils/errors');
+<<<<<<< HEAD
+const { createOnePerson, getOnePerson, updateOnePerson } = require('./personsService');
 const { getOneOrganization } = require('./organizationsService');
+=======
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
-const { createOnePersonWithAuthorityFk, getOnePerson, updateOnePerson } = require('./personsService')
+const { createOnePersonWithAuthorityFk, getOnePerson } = require('./personsService')
 const { sendApproveLetter, sendRejectLetter } = require('./emailService.js')
+>>>>>>> origin/dev2
 
 const getAllRegistrators = async() => {
     try {
