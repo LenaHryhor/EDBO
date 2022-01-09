@@ -8,7 +8,7 @@ const { sendApproveLetter, sendRejectLetter } = require('./emailService.js')
 const getAllRegistrators = async() => {
     try {
         const client = createConnection();
-        const result = await client.query(`select registrar_id, name, surname, patronymic, birthday_date, long_name as organization_name, position, registrars.email, series, number, code as authority_code, issue_date, identification_code, status, person from ((registrars join persons on registrars.person_fk = persons.person) join organizations on organization_fk = organization_id) join authorities on persons.authorities_fk = authorities.authority_id`);
+        const result = await client.query(`select registrar_id, name, surname, patronymic, birthday_date, long_name as organization_name, position, registrars.email, series, number, code as authority_code, issue_date, identification_code, status, person_id from ((registrars join persons on registrars.person_fk = persons.person_id) join organizations on organization_fk = organization_id) join authorities on persons.authorities_fk = authorities.authority_id`);
         client.end();
         return result.rows;
     } catch (err) {
