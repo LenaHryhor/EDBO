@@ -27,14 +27,14 @@ const getToken = async(username, password) => {
         }
 
         const client2 = createConnection();
-        const registrar2 = await client2.query(`SELECT password, admin_id FROM public.admins WHERE login = '${username}'`);
+        const administrator = await client2.query(`SELECT password, admin_id FROM public.admins WHERE login = '${username}'`);
         client2.end();
-        if (registrar2.rows[0]) {
-            if (!(await bcrypt.compare(password, registrar2.rows[0].password))) {
+        if (administrator.rows[0]) {
+            if (!(await bcrypt.compare(password, administrator.rows[0].password))) {
                 throw new LoginError('Invalid username or password');
             }
             const token = jwt.sign({
-                user_id: registrar2.registrar_id,
+                user_id: administrator.admin_id,
                 username: username,
                 role: "administrator"
             }, process.env.secret || 'secret');

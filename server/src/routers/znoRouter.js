@@ -1,11 +1,11 @@
 const asyncWrapper = require('../utils/apiUtils');
 const { getZno, createZno, updateZno } = require('../controllers/znoController')
-const authMiddleware = require('../middlewares/authMiddleware')
+const { registratorMiddleware } = require('../middlewares/authMiddleware')
 const router = require('express').Router();
 
 router.get('/', asyncWrapper(getZno));
-router.post('/create', authMiddleware, asyncWrapper(createZno));
-router.put('/update', authMiddleware, asyncWrapper(updateZno));
+router.post('/create', registratorMiddleware, asyncWrapper(createZno));
+router.put('/update', registratorMiddleware, asyncWrapper(updateZno));
 
 
 module.exports = router;

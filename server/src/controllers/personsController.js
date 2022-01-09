@@ -6,7 +6,7 @@ const getPerson = async(req, res) => {
     if (!person) {
         return res.status(400).json({ message: 'Немає записів з такими даними!' })
     }
-    res.status(200).json(diploma);
+    res.status(200).json(person);
 }
 
 const createPerson = async(req, res) => {
