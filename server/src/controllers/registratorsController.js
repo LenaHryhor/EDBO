@@ -31,8 +31,8 @@ const changeStatus = async(req, res) => {
 }
 
 const updateRegistrator = async(req, res) => {
-    const { registrar_id, name, surname, patronymic, birthday_date, organization_name, position, email, p_series, p_number, authority_code, issue_date, identification_code } = req.body;
-    await updateOneRegistrator({ registrar_id, name, surname, patronymic, birthday_date, organization_name, position, email, p_series, p_number, authority_code, issue_date, identification_code });
+    const { registrar_id, person_id, name, surname, patronymic, birthday_date, organization_name, position, email, p_series, p_number, authority_code, issue_date, identification_code } = req.body;
+    await updateOneRegistrator({ registrar_id, person_id, name, surname, patronymic, birthday_date, organization_name, position, email, p_series, p_number, authority_code, issue_date, identification_code });
     res.status(200).json({ message: "Registrator updated successfully" })
 }
 
