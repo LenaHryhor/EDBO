@@ -1,4 +1,4 @@
-const { getAllRegistrators, getAllQueries, getJournalById, changeStatusById, createOneQuery } = require('../services/registratorsService')
+const { getAllRegistrators, getAllQueries, getJournalById, changeStatusById, createOneQuery, updateOneRegistrator } = require('../services/registratorsService')
 
 const getRegistrators = async(req, res) => {
     const registrators = await getAllRegistrators();
@@ -30,8 +30,11 @@ const changeStatus = async(req, res) => {
     res.status(200).json({ "message": "Статус змінено успішно" })
 }
 
-
-const updateRegistrator = async(req, res) => {}
+const updateRegistrator = async(req, res) => {
+    const { registrar_id, name, surname, patronymic, birthday_date, organization_name, position, email, p_series, p_number, authority_code, issue_date, identification_code } = req.body;
+    await updateOneRegistrator({ registrar_id, name, surname, patronymic, birthday_date, organization_name, position, email, p_series, p_number, authority_code, issue_date, identification_code });
+    res.status(200).json({ message: "Registrator updated successfully" })
+}
 
 const createQuery = (async(req, res) => {
     const { email, name, surname, patronymic, identification_code, p_series, p_number, issue_date, authority_code, position, organization_name, birthday_date } = req.body;

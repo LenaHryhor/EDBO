@@ -1,6 +1,7 @@
 const createConnection = require('../db');
 const { SqlError, InvalidRequestError } = require('../utils/errors');
-const { createOnePerson, getOnePerson } = require('./personsService')
+const { createOnePerson, getOnePerson, updateOnePerson } = require('./personsService');
+const { getOneOrganization } = require('./organizationsService');
 
 const getAllRegistrators = async() => {
     try {
@@ -81,5 +82,29 @@ const createOneQuery = async({ email, name, surname, patronymic, identification_
     }
 }
 
+const updateOneRegistrator = async({registrar_id, name, surname, patronymic, birthday_date, organization_name, position, email, p_series, p_number, authority_code, issue_date, identification_code }) => {
+     try {
+        let person = await getOnePerson({ name, surname, p_series, p_number})
+        if (!person) {
+           throw new InvalidRequestError("Такої людини не існує")
+        }
 
-module.exports = { getAllRegistrators, getAllQueries, getJournalById, changeStatusById, createOneQuery };
+        let organization = await getOneOrganization(organization_name);
+        if(!organization){
+            throw new InvalidRequestError("Немає такої організації")
+        }
+        var person_id = person.person_id;
+        var organization_id = organization.organization_id;
+        await updateOnePerson ({ person_id, name, surname, patronymic, p_series, p_number, birthday_date, issue_date, authority_code });
+        
+        const client = createConnection();
+        await client.query(`UPDATE registrars SET person_fk = '${person_id}', position = '${position}', organization_fk = '${organization_id}', identification_code = '${identification_code}', email = '${email}' WHERE registrar_id = '${registrar_id}'`)
+        
+        client.end();
+    } catch (err) {
+        throw new SqlError(err.message)
+    }
+
+}
+
+module.exports = { getAllRegistrators, getAllQueries, getJournalById, changeStatusById, createOneQuery, updateOneRegistrator };
