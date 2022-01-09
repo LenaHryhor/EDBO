@@ -1,9 +1,7 @@
 const createConnection = require('../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-var crypto = require("crypto");
 const { LoginError, SqlError } = require('../utils/errors');
-const { createOnePerson, getOnePerson } = require('./personsService')
 
 
 const getToken = async(username, password) => {
@@ -46,25 +44,5 @@ const getToken = async(username, password) => {
     }
 }
 
-const addRegistrator = async(email, name, surname, patronymic, identification_code, p_series, p_number, issue_date, authority_code, position, organization_name, birthday_date) => {
-    const password = crypto.randomBytes(10).toString('hex');
-    const db_password = await bcrypt.hash(password, 10);
-    const username = (email.split('@'))[0];
-    try {
-        let person_id = await getOnePerson({ p_series, p_number, name, surname })
-        if (!person_id) {
-            await createOnePerson({ name, surname, patronymic, p_series, p_number, birthday_date, issue_date, authority_code })
-            person_id = await getOnePerson({ p_series, p_number, name, surname })
-        }
-        const client = createConnection();
-        const organization = await client.query(`SELECT organization_id FROM public.organizations WHERE long_name = '${organization_name}'`);
-        client.end();
-        client2 = createConnection();
-        await client3.query(`INSERT INTO registrars (identification_code, position, person_fk, email, organization_fk, login, password, status) VALUES ('${identification_code}', '${position}', ${person_id.person_id}, '${email}', ${organization.rows[0].organization_id},'${username}','${db_password}', 'true')`)
-        client2.end();
-    } catch (err) {
-        throw new SqlError(err.message)
-    }
-}
 
-module.exports = { getToken, addRegistrator };
+module.exports = { getToken };

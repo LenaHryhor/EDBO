@@ -29,6 +29,16 @@ const createOnePerson = async({ name, surname, patronymic, p_series, p_number, b
     }
 }
 
+const createOnePersonWithAuthorityFk = async({ name, surname, patronymic, p_series, p_number, birthday_date, issue_date, authority_fk }) => {
+    try {
+        const client = createConnection();
+        await client.query(`INSERT INTO persons (name, surname, patronymic, series, number, issue_date, birthday_date, authorities_fk) VALUES ('${name}', '${surname}', '${patronymic}', '${p_series}', '${p_number}', '${issue_date}', '${birthday_date}', ${authority_fk})`)
+        client.end();
+    } catch (err) {
+        throw new SqlError(err.message)
+    }
+}
+
 const updateOnePerson = async({ person_id, name, surname, patronymic, p_series, p_number, birthday_date, issue_date, authority_code }) => {
     try {
         const client = createConnection();
@@ -45,4 +55,4 @@ const updateOnePerson = async({ person_id, name, surname, patronymic, p_series, 
     }
 }
 
-module.exports = { getOnePerson, createOnePerson, updateOnePerson };
+module.exports = { getOnePerson, createOnePerson, updateOnePerson, createOnePersonWithAuthorityFk };

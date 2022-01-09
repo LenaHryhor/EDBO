@@ -1,4 +1,4 @@
-const { getAllRegistrators, getAllQueries, getJournalById, changeStatusById, createOneQuery } = require('../services/registratorsService')
+const { getAllRegistrators, getAllQueries, getJournalById, changeStatusById, createOneQuery, approveQuery, rejectQuery } = require('../services/registratorsService')
 
 const getRegistrators = async(req, res) => {
     const registrators = await getAllRegistrators();
@@ -18,10 +18,18 @@ const getJournal = async(req, res) => {
 }
 
 
-const approveRegistrator = async(req, res) => {}
+const approveRegistrator = async(req, res) => {
+    const { query_id } = req.query;
+    await approveQuery(query_id);
+    res.json({ message: 'Success!' });
+}
 
 
-const rejectRegistrator = async(req, res) => {}
+const rejectRegistrator = async(req, res) => {
+    const { query_id } = req.query;
+    await rejectQuery(query_id);
+    res.json({ message: 'Success!' });
+}
 
 
 const changeStatus = async(req, res) => {
@@ -38,9 +46,5 @@ const createQuery = (async(req, res) => {
     await createOneQuery({ email, name, surname, patronymic, identification_code, p_series, p_number, issue_date, authority_code, position, organization_name, birthday_date });
     res.json({ message: 'Success!' });
 });
-
-
-
-
 
 module.exports = { createQuery, getRegistrators, getQueries, getJournal, approveRegistrator, rejectRegistrator, changeStatus, updateRegistrator };

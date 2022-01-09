@@ -1,11 +1,14 @@
 const createConnection = require('../db');
 const { SqlError, InvalidRequestError } = require('../utils/errors');
-const { createOnePerson, getOnePerson } = require('./personsService')
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
+const { createOnePersonWithAuthorityFk, getOnePerson } = require('./personsService')
+const { sendApproveLetter, sendRejectLetter } = require('./emailService.js')
 
 const getAllRegistrators = async() => {
     try {
         const client = createConnection();
-        const result = await client.query(`select registrar_id, name, surname, patronymic, birthday_date, long_name as organization_name, position, registrars.email, series, number, authority_id, issue_date, identification_code, status, person_id from ((registrars join persons on registrars.person_fk = persons.person_id) join organizations on organization_fk = organization_id) join authorities on persons.authorities_fk = authorities.authority_id`);
+        const result = await client.query(`select registrar_id, name, surname, patronymic, birthday_date, long_name as organization_name, position, registrars.email, series, number, code as authority_code, issue_date, identification_code, status, person from ((registrars join persons on registrars.person_fk = persons.person) join organizations on organization_fk = organization_id) join authorities on persons.authorities_fk = authorities.authority_id`);
         client.end();
         return result.rows;
     } catch (err) {
@@ -16,7 +19,7 @@ const getAllRegistrators = async() => {
 const getAllQueries = async() => {
     try {
         const client = createConnection();
-        const result = await client.query(`select query_id, name, surname, patronymic, queries.birthdy_date, long_name as organization_name, position, queries.email, series, number, code as authority_code, issue_date, identification_code, status from (queries join organizations on organization_fk = organization_id) join authorities on queries.authority_fk = authorities.authority_id`);
+        const result = await client.query(`select query_id, name, surname, patronymic, queries.birthday_date, long_name as organization_name, position, queries.email, series, number, code as authority_code, issue_date, identification_code, status from (queries join organizations on organization_fk = organization_id) join authorities on queries.authority_fk = authorities.authority_id where queries.status = 2`);
         client.end();
         return result.rows;
     } catch (err) {
@@ -54,15 +57,7 @@ const changeStatusById = async(registrator_id) => {
 }
 
 const createOneQuery = async({ email, name, surname, patronymic, identification_code, p_series, p_number, issue_date, authority_code, position, organization_name, birthday_date }) => {
-    // const password = crypto.randomBytes(10).toString('hex');
-    // const db_password = await bcrypt.hash(password, 10);
-    // const username = (email.split('@'))[0];
     try {
-        // let person_id = await getOnePerson({ p_series, p_number, name, surname })
-        // if (!person_id) {
-        //     await createOnePerson({ name, surname, patronymic, p_series, p_number, birthday_date, issue_date, authority_code })
-        //     person_id = await getOnePerson({ p_series, p_number, name, surname })
-        // }
         const client = createConnection();
         const organization = await client.query(`SELECT organization_id FROM public.organizations WHERE long_name = '${organization_name}'`);
         client.end();
@@ -81,5 +76,47 @@ const createOneQuery = async({ email, name, surname, patronymic, identification_
     }
 }
 
+const approveQuery = async(query_id) => {
+    try {
+        const client = createConnection();
+        const result = await client.query(`select * from queries where query_id = ${query_id}`);
+        client.end();
+        let { email, name, surname, patronymic, identification_code, series, number, issue_date, authority_fk, position, organization_fk, birthday_date } = result.rows[0];
+        let p_series = series;
+        let p_number = number;
+        let person = await getOnePerson({ p_series, p_number, name, surname })
+        issue_date = issue_date.toISOString().split('T')[0]
+        birthday_date = birthday_date.toISOString().split('T')[0]
+        if (!person) {
+            await createOnePersonWithAuthorityFk({ name, surname, patronymic, p_series, p_number, birthday_date, issue_date, authority_fk })
+            person = await getOnePerson({ p_series, p_number, name, surname })
+        }
+        const password = crypto.randomBytes(10).toString('hex');
+        const db_password = await bcrypt.hash(password, 10);
+        const username = (email.split('@'))[0];
+        const client2 = createConnection();
+        await client2.query(`INSERT INTO registrars (person_fk, identification_code, position, email, organization_fk, status, login, password) VALUES (${person.person_id}, '${identification_code}', '${position}', '${email}', ${organization_fk}, 'true','${username}', '${db_password}' )`)
+        client2.end();
+        const client3 = createConnection();
+        await client3.query(`Update queries set status = 0 where query_id = ${query_id}`)
+        client3.end();
+        await sendApproveLetter(email, username, password)
+    } catch (err) {
+        throw new SqlError(err.message)
+    }
+}
 
-module.exports = { getAllRegistrators, getAllQueries, getJournalById, changeStatusById, createOneQuery };
+
+const rejectQuery = async(query_id) => {
+    const client = createConnection();
+    const result = await client.query(`select * from queries where query_id = ${query_id}`);
+    client.end();
+    let { email } = result.rows[0];
+    const client2 = createConnection();
+    await client2.query(`Update queries set status = 1 where query_id = ${query_id}`)
+    client2.end();
+    await sendRejectLetter(email)
+}
+
+
+module.exports = { getAllRegistrators, getAllQueries, getJournalById, changeStatusById, createOneQuery, approveQuery, rejectQuery };
