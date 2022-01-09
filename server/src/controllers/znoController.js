@@ -28,25 +28,21 @@ const createZno = async(req, res) => {
 }
 
 const updateZno = async(req, res) => {
-    const { year, number, name, surname, patronymic, results} = req.query;
-    const resultOld = await getOneYearZno(year, number, name, surname, patronymic);
-    if (result.length === 0) {
-        throw new InvalidRequestError('Немає записів з такими даними!')
+    const {old_number, number, old_year, year, name, surname, patronymic, results} = req.query;
+    
+    const result2 = await updateOneYearZno(old_number, number, old_year, year, results);
+    if (result2 == 0) {
+        throw new InvalidRequestError('Помилка оновлення запису!')
     }
-    const zno = {
-        result: resultOld,
+        
+const zno = {
+        result: results,
         number: number,
         year: year,
         patronymic: patronymic,
         surname: surname,
         name: name
     }
-   
-        const result2 = await updateOneYearZno(year, number, name, surname, patronymic, resultOld, results);
-        if (result2.length === 0) {
-            throw new InvalidRequestError('Помилка оновлення запису!')
-        }
-
     res.status(200).json(zno);
 }
 
