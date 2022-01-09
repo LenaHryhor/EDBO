@@ -1,4 +1,4 @@
-const { getToken, addRegistrator } = require('../services/authService')
+const { getToken } = require('../services/authService')
 
 const loginUser = async(req, res) => {
     const {
@@ -13,20 +13,4 @@ const loginUser = async(req, res) => {
     })
 }
 
-const registerUser = (async(req, res) => {
-    const {
-        email,
-        name,
-        surname,
-        patronimic,
-        identification_code,
-        series,
-        number,
-        position,
-        organization_name
-    } = req.body;
-    await addRegistrator(email, name, surname, patronimic, identification_code, series, number, position, organization_name);
-    res.json({ message: 'Success!' });
-});
-
-module.exports = { loginUser, registerUser };
+module.exports = { loginUser };
