@@ -69,7 +69,12 @@ const createOneQuery = async({ email, name, surname, patronymic, identification_
         if (!authority.rows[0]) {
             throw new InvalidRequestError("Такого коду не існує")
         }
+
         client3 = createConnection();
+        const result1 = await client3.query(`SELECT * FROM registrars WHERE identification_code = '${identification_code}' AND p_number = ${p_number}`)
+        if (result1.rows[0].registrar_id != undefined) {
+            throw new InvalidRequestError("Такий identification_code уже існує")
+        }
         await client3.query(`INSERT INTO queries (name, surname, patronymic, series, number, issue_date, identification_code, position, email, organization_fk, authority_fk, birthday_date, status) VALUES ('${name}', '${surname}', '${patronymic}', '${p_series}', '${p_number}', '${issue_date}', '${identification_code}', '${position}', '${email}', ${organization.rows[0].organization_id}, ${authority.rows[0].authority_id}, '${birthday_date}', 2)`)
         client3.end();
     } catch (err) {
@@ -88,6 +93,10 @@ const updateOneRegistrator = async({registrar_id, person_id, name, surname, patr
         await updateOnePerson ({ person_id, name, surname, patronymic, p_series, p_number, birthday_date, issue_date, authority_code });
         
         const client = createConnection();
+        const result1 = await client.query(`SELECT * FROM registrars WHERE number = '${p_number}' AND series = ${p_series}`)
+        if (result1.rows[0].registrar_id != undefined) {
+            throw new InvalidRequestError("Такий number паспорту уже існує")
+        }
         await client.query(`UPDATE registrars SET position = '${position}', organization_fk = '${organization_id}', identification_code = '${identification_code}', email = '${email}' WHERE registrar_id = '${registrar_id}'`)
         
         client.end();

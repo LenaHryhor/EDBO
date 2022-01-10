@@ -20,6 +20,12 @@ const createOneCertificate = async({ year_graduation, number, position, comissio
             throw new InvalidRequestError("Такої людини не існує")
         }
         const client = createConnection();
+        
+        const result = await client.query(`SELECT * FROM certificates WHERE number = '${number}'`)
+        if (result.rows[0].certificate_id != undefined) {
+            throw new InvalidRequestError("Сертифікат з таким номером уже існує")
+        }
+
         await client.query(`INSERT into certificates (year_graduation, number, position, comission_number, person_fk, start_date, end_date) VALUES ('${year_graduation}', '${number}', '${position}', '${comission_number}', ${person_id.person_id}, '${start_date}', '${end_date}')`)
         client.end();
     } catch (err) {
@@ -30,6 +36,12 @@ const createOneCertificate = async({ year_graduation, number, position, comissio
 const updateOneCertificate = async({ certificate_id, year_graduation, number, position, comission_number, start_date, end_date }) => {
     try {
         const client = createConnection();
+
+        const result = await client.query(`SELECT * FROM certificates WHERE number = '${number}'`)
+        if (result.rows[0].certificate_id != undefined) {
+            throw new InvalidRequestError("Сертифікат з таким номером уже існує")
+        }
+        
         await client.query(`UPDATE certificates SET year_graduation = '${year_graduation}', number = '${number}', position = '${position}' , start_date = '${start_date}', end_date = '${end_date}', comission_number = '${comission_number}' where certificate_id = ${certificate_id}`)
         client.end();
     } catch (err) {

@@ -32,6 +32,12 @@ const createOneInstitution = async({ code_edbo, long_name, short_name, code_iden
             throw new InvalidRequestError("Такої людини не існує")
         }
         const client = createConnection();
+
+        const result1 = await client.query(`SELECT * FROM educational_institutions WHERE long_name = '${long_name}' AND code_edbo = ${code_edbo}`)
+        if (result1.rows[0].institution_id != undefined) {
+            throw new InvalidRequestError("institutions з таким номером уже існує")
+        }
+
         await client.query(`INSERT into educational_institutions (code_edbo, long_name, short_name, code_identification, type, form, address, region, phone, email, site, year_foundation, unit_institution, postal_code, global_type, position, head_fk ) VALUES ('${code_edbo}', '${long_name}', '${short_name}', '${code_identification}', '${type}', '${form}', '${adress}', '${region}', '${phone}', '${email}', '${site}', '${year_foundation}', '${unit_institution}', '${postal_code}', '${global_type}', '${position}', ${person_id.person_id} )`)
         client.end();
     } catch (err) {
@@ -57,6 +63,10 @@ const updateOneInstitution = async({institution_id, code_edbo, long_name, short_
             throw new InvalidRequestError("Такої людини не існує")
         }
         const client = createConnection();
+        const result1 = await client.query(`SELECT * FROM educational_institutions WHERE long_name = '${long_name}' AND code_edbo = ${code_edbo}`)
+        if (result1.rows[0].institution_id != undefined) {
+            throw new InvalidRequestError("institutions з таким номером уже існує")
+        }
         await client.query(`UPDATE educational_institutions SET code_edbo = '${code_edbo}', long_name = '${long_name}', short_name = '${short_name}', code_identification = '${code_identification}', type = '${type}', form = '${form}', address = '${adress}', region = '${region}', phone = '${phone}', email = '${email}', site = '${site}', year_foundation = '${year_foundation}', unit_institution = '${unit_institution}', postal_code = '${postal_code}', global_type = '${global_type}', position = '${position}', head_fk = ${person_id.person_id} WHERE institution_id = ${institution_id}`)
         client.end();
     } catch (err) {

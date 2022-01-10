@@ -36,6 +36,12 @@ const createOneDiploma = async({ type, global_type, series, number, year_graduat
             throw new InvalidRequestError("Такого закладу не існує")
         }
         const client = createConnection();
+        
+        const result1 = await client.query(`SELECT * FROM diplomas WHERE number = '${number}'`)
+        if (result1.rows[0].diploma_id != undefined) {
+            throw new InvalidRequestError("Документ з таким номером уже існує")
+        }
+
         const result = await client.query(`INSERT into diplomas (type, global_type, series, number, year_graduation, date_issue, person_fk, institution_fk) VALUES ('${type}', '${global_type}', '${series}', '${number}', '${year_graduation}', '${date_issue}', ${person_id.person_id}, ${institution_id.institution_id} )`)
         client.end();
         return result.rows[0];
@@ -53,6 +59,12 @@ const updateOneDiploma = async({ diploma_id, type, global_type, series, number, 
         }
         console.log(institution_id)
         const client = createConnection();
+
+        const result1 = await client.query(`SELECT * FROM diplomas WHERE number = '${number}'`)
+        if (result1.rows[0].diploma_id != undefined) {
+            throw new InvalidRequestError("Документ з таким номером уже існує")
+        }
+        
         await client.query(`UPDATE diplomas SET type = '${type}', global_type = '${global_type}', number = '${number}', series = '${series}', year_graduation = '${year_graduation}', date_issue = '${date_issue}', institution_fk = ${institution_id.institution_id} where diploma_id = ${diploma_id}`)
         client.end();
     } catch (err) {

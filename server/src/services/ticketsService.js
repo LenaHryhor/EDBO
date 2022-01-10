@@ -26,6 +26,11 @@ const createOneTicket = async(type, series, number, name, institution_name, surn
             throw new InvalidRequestError("Такого закладу не існує")
         }
         const client = createConnection();
+        
+        const result1 = await client.query(`SELECT * FROM students_tickets WHERE number = '${number}' AND series = ${series}`)
+        if (result1.rows[0].student_ticket_id != undefined) {
+            throw new InvalidRequestError("Такий number паспорту уже існує")
+        }
         await client.query(`INSERT into students_tickets (type, number, series, start_date, end_date, person_fk, institution_fk) VALUES ('${type}', '${number}', '${series}' , '${start_date}', '${end_date}', ${person_id.person_id}, ${institution_id.institution_id} )`)
         client.end();
     } catch (err) {
@@ -40,6 +45,10 @@ const updateOneTicket = async({ student_ticket_id, type_int, series, number, ins
             throw new InvalidRequestError("Такого закладу не існує")
         }
         const client = createConnection();
+        const result1 = await client.query(`SELECT * FROM students_tickets WHERE number = '${number}' AND series = ${series}`)
+        if (result1.rows[0].student_ticket_id != undefined) {
+            throw new InvalidRequestError("Такий number паспорту уже існує")
+        }
         await client.query(`UPDATE students_tickets SET type = ${type_int}, number = '${number}', series = '${series}' , start_date = '${start_date}', end_date = '${end_date}', institution_fk = ${institution_id.institution_id} where student_ticket_id = ${student_ticket_id}`)
         client.end();
     } catch (err) {
