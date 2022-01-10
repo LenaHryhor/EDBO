@@ -36,9 +36,9 @@ const createOneDiploma = async({ type, global_type, series, number, year_graduat
             throw new InvalidRequestError("Такого закладу не існує")
         }
         const client = createConnection();
-        const result = await client.query(`INSERT into diplomas (type, global_type, series, number, year_graduation, date_issue, person_fk, institution_fk) VALUES ('${type}', '${global_type}', '${series}', '${number}', '${year_graduation}', '${date_issue}', ${person_id.person_id}, ${institution_id.institution_id} )`)
+        const result = await client.query(`INSERT into diplomas (type, global_type, series, number, year_graduation, date_issue, person_fk, institution_fk) VALUES ('${type}', '${global_type}', '${series}', '${number}', '${year_graduation}', '${date_issue}', ${person_id.person_id}, ${institution_id.institution_id} ) RETURNING diploma_id`)
         client.end();
-        return result.rows[0];
+        return result.rows[0].diploma_id;
     } catch (err) {
         throw new SqlError(err.message)
     }

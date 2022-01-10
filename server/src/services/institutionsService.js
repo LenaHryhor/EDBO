@@ -5,7 +5,7 @@ const { getOnePerson } = require('./personsService')
 const getInstitutionsByRegion = async(region, global_type) => {
     try {
         const client = createConnection();
-        const result = await client.query(`SELECT institution_id, code_edbo, long_name, short_name, code_identification, form, concat(address, ', ', city, ', ', region) as long_adress, type, phone, email, site, year_foundation, postal_code, unit_institution, position, p.name, p.surname, p.patronymic FROM public.educational_institutions JOIN persons as p ON p.person_id = head_fk WHERE region = '${region}' AND global_type = '${global_type}';`);
+        const result = await client.query(`SELECT institution_id, code_edbo, long_name, short_name, code_identification, form, concat(address, ', ', region) as long_adress, type, phone, email, site, year_foundation, postal_code, unit_institution, position, p.name, p.surname, p.patronymic FROM public.educational_institutions JOIN persons as p ON p.person_id = head_fk WHERE region = '${region}' AND global_type = '${global_type}';`);
         client.end();
         return result.rows;
     } catch (err) {
@@ -16,7 +16,7 @@ const getInstitutionsByRegion = async(region, global_type) => {
 const getInstitutionsByRegionAndName = async(region, global_type, name) => {
     try {
         const client = createConnection();
-        const result = await client.query(`SELECT institution_id, code_edbo, long_name, short_name, code_identification, form, concat(address, ', ', city, ', ', region) as long_adress, type, phone, email, site, year_foundation, postal_code, unit_institution, position, p.name, p.surname, p.patronymic FROM public.educational_institutions JOIN persons as p ON p.person_id = head_fk WHERE region = '${region}' AND global_type = '${global_type}' AND long_name LIKE '%${name}%'`);
+        const result = await client.query(`SELECT institution_id, code_edbo, long_name, short_name, code_identification, form, concat(address, ', ', region) as long_adress, type, phone, email, site, year_foundation, postal_code, unit_institution, position, p.name, p.surname, p.patronymic FROM public.educational_institutions JOIN persons as p ON p.person_id = head_fk WHERE region = '${region}' AND global_type = '${global_type}' AND long_name LIKE '%${name}%'`);
         client.end();
         return result.rows;
     } catch (err) {
@@ -24,15 +24,24 @@ const getInstitutionsByRegionAndName = async(region, global_type, name) => {
     }
 }
 
-const createOneInstitution = async({ code_edbo, long_name, short_name, code_identification, type, form, adress, region, city, phone, email, site, year_foundation, unit_institution, postal_code, global_type, position, name, surname, patronymic, p_series, p_number, authority_code, issue_date, birthday_date }) => {
+const getOneInstitution = async(region, global_type, name) => {
+    const client = createConnection();
+    const result = await client.query(`SELECT institution_id, code_edbo, long_name, short_name, code_identification, form, concat(address, ', ', region) as long_adress, type, phone, email, site, year_foundation, postal_code, unit_institution, region, global_type, position, p.name, p.surname, p.patronymic, p.series as p_series, p.number as p_number FROM public.educational_institutions JOIN persons as p ON p.person_id = head_fk WHERE region = '${region}' AND global_type = '${global_type}' AND long_name = '${name}'`);
+    client.end();
+    return result.rows[0];
+}
+
+const createOneInstitution = async({ code_edbo, long_name, short_name, code_identification, type, form, adress, region, phone, email, site, year_foundation, unit_institution, postal_code, global_type, position, name, surname, patronymic, p_series, p_number }) => {
     try {
-        let person_id = await getOnePerson({ p_series, p_number, name, surname })
+        let person_id = await getOnePerson({ name, surname, patronymic, p_series, p_number })
+
         if (!person_id) {
             throw new InvalidRequestError("Такої людини не існує")
         }
         const client = createConnection();
-        await client.query(`INSERT into institutions (code_edbo, long_name, short_name, code_identification, type, form, adress, region, city, phone, email, site, year_foundation, unit_institution, postal_code, global_type, position, person_fk ) VALUES ('${code_edbo}', '${long_name}', '${short_name}', '${code_identification}', '${type}', '${form}', '${adress}', '${region}', '${city}', '${phone}', '${email}', '${site}', '${year_foundation}', '${unit_institution}', '${postal_code}', '${global_type}', '${position}', ${person_id.person_id} )`)
+        const result = await client.query(`INSERT into educational_institutions (code_edbo, long_name, short_name, code_identification, type, form, address, region, phone, email, site, year_foundation, unit_institution, postal_code, global_type, position, head_fk ) VALUES ('${code_edbo}', '${long_name}', '${short_name}', '${code_identification}', '${type}', '${form}', '${adress}', '${region}', '${phone}', '${email}', '${site}', '${year_foundation}', '${unit_institution}', '${postal_code}', '${global_type}', '${position}', ${person_id.person_id} ) RETURNING institution_id`)
         client.end();
+        return result.rows[0].institution_id
     } catch (err) {
         throw new SqlError(err.message)
     }
@@ -49,4 +58,19 @@ const getInstitutionId = async(institution_name) => {
     }
 }
 
-module.exports = { getInstitutionsByRegion, getInstitutionsByRegionAndName, createOneInstitution, getInstitutionId };
+const updateOneInstitution = async({ institution_id, code_edbo, long_name, short_name, code_identification, type, form, adress, region, phone, email, site, year_foundation, unit_institution, postal_code, global_type, position, name, surname, patronymic, p_series, p_number }) => {
+    try {
+        let person_id = await getOnePerson({ name, surname, patronymic, p_series, p_number })
+        console.log(person_id)
+        if (!person_id) {
+            throw new InvalidRequestError("Такої людини не існує")
+        }
+        const client = createConnection();
+        await client.query(`UPDATE educational_institutions SET code_edbo = '${code_edbo}', long_name = '${long_name}', short_name = '${short_name}', code_identification = '${code_identification}', type = '${type}', form = '${form}', address = '${adress}', region = '${region}', phone = '${phone}', email = '${email}', site = '${site}', year_foundation = '${year_foundation}', unit_institution = '${unit_institution}', postal_code = '${postal_code}', global_type = '${global_type}', position = '${position}', head_fk = ${person_id.person_id} WHERE institution_id = ${institution_id}`)
+        client.end();
+    } catch (err) {
+        throw new SqlError(err.message)
+    }
+}
+
+module.exports = { getInstitutionsByRegion, getInstitutionsByRegionAndName, createOneInstitution, getInstitutionId, updateOneInstitution, getOneInstitution };

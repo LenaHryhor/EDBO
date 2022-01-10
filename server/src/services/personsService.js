@@ -22,8 +22,9 @@ const createOnePerson = async({ name, surname, patronymic, p_series, p_number, b
             throw new InvalidRequestError("Такого коду не існує")
         }
         const client2 = createConnection();
-        await client2.query(`INSERT INTO persons (name, surname, patronymic, series, number, issue_date, birthday_date, authorities_fk) VALUES ('${name}', '${surname}', '${patronymic}', '${p_series}', '${p_number}', '${issue_date}', '${birthday_date}', ${authority.rows[0].authority_id})`)
+        const result = await client2.query(`INSERT INTO persons (name, surname, patronymic, series, number, issue_date, birthday_date, authorities_fk) VALUES ('${name}', '${surname}', '${patronymic}', '${p_series}', '${p_number}', '${issue_date}', '${birthday_date}', ${authority.rows[0].authority_id}) returning person_id`)
         client2.end();
+        return result.rows[0].person_id
     } catch (err) {
         throw new SqlError(err.message)
     }

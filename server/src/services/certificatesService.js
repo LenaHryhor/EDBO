@@ -20,8 +20,9 @@ const createOneCertificate = async({ year_graduation, number, position, comissio
             throw new InvalidRequestError("Такої людини не існує")
         }
         const client = createConnection();
-        await client.query(`INSERT into certificates (year_graduation, number, position, comission_number, person_fk, start_date, end_date) VALUES ('${year_graduation}', '${number}', '${position}', '${comission_number}', ${person_id.person_id}, '${start_date}', '${end_date}')`)
+        const result = await client.query(`INSERT into certificates (year_graduation, number, position, comission_number, person_fk, start_date, end_date) VALUES ('${year_graduation}', '${number}', '${position}', '${comission_number}', ${person_id.person_id}, '${start_date}', '${end_date}') RETURNING certificate_id`)
         client.end();
+        return result.rows[0].certificate_id
     } catch (err) {
         throw new SqlError(err.message)
     }

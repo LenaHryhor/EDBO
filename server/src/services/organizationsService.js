@@ -4,7 +4,7 @@ const { SqlError } = require('../utils/errors');
 const getAllOrganizations = async() => {
     try {
         const client = createConnection();
-        const result = await client.query(`SELECT  long_name from organizations;`);
+        const result = await client.query(`SELECT long_name from organizations;`);
         client.end();
         return result.rows;
     } catch (err) {

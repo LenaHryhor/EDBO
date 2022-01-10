@@ -26,8 +26,9 @@ const createOneTicket = async(type, series, number, name, institution_name, surn
             throw new InvalidRequestError("Такого закладу не існує")
         }
         const client = createConnection();
-        await client.query(`INSERT into students_tickets (type, number, series, start_date, end_date, person_fk, institution_fk) VALUES ('${type}', '${number}', '${series}' , '${start_date}', '${end_date}', ${person_id.person_id}, ${institution_id.institution_id} )`)
+        const result = await client.query(`INSERT into students_tickets (type, number, series, start_date, end_date, person_fk, institution_fk) VALUES ('${type}', '${number}', '${series}' , '${start_date}', '${end_date}', ${person_id.person_id}, ${institution_id.institution_id} ) returning student_ticket_id`)
         client.end();
+        return result.rows[0].student_ticket_id
     } catch (err) {
         throw new SqlError(err.message)
     }
