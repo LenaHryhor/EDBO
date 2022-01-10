@@ -1,6 +1,8 @@
 const createConnection = require('../db');
 const { SqlError, InvalidRequestError } = require('../utils/errors');
 const { getOnePerson } = require('./personsService')
+const { createLog } = require('./logsService')
+
 
 const getOneYearZno = async(year, number, name, surname, patronymic) => {
     try {
